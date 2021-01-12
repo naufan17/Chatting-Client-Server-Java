@@ -13,20 +13,19 @@ public class Client implements Runnable {
     private final String hostname;
 
     public Client() throws IOException {
-        // get hostname
         keyboard = new Scanner(System.in);
+
+        // input hostname
         System.out.print("Masukkan hostname : ");
         hostname = keyboard.next();
 
-        // get port
+        // input port
         System.out.print("Masukkan port : ");
         port = keyboard.nextInt();
 
-        // get username
+        // input username
         System.out.print("Masukkan Username : ");
         username = keyboard.next();
-
-        initialize();
     }
 
     private void initialize() throws IOException {
@@ -36,6 +35,7 @@ public class Client implements Runnable {
             host = InetAddress.getByName(hostname);
         } catch (UnknownHostException ex) {
             System.out.println("Host tidak ditemukan");
+            ex.printStackTrace();
         }
 
         // connect to server
@@ -47,17 +47,23 @@ public class Client implements Runnable {
             System.out.println("Server tidak ditemukan");
             ex.printStackTrace();
         }
-
         System.out.println("Anda telah terhubung");
 
+        // variable input & output
         inputStream = new Scanner(link.getInputStream());
         outputStream = new PrintWriter(link.getOutputStream());
+        // send username to server
+        outputStream.println(username);
 
-        // start new thread
+        Chat();
+    }
+
+    private void Chat(){
+        // start new thread massage
         Thread t = new Thread(this);
         t.start();
 
-        // continuously listen your user input
+        // input client massage & send to server
         while (keyboard.hasNextLine()) {
             String msg = keyboard.nextLine();
             outputStream.println(username + " : " + msg);
@@ -66,10 +72,11 @@ public class Client implements Runnable {
     }
 
     public static void main(String[] args) throws Exception {
-        new Client();
+        new Client().initialize();
     }
 
     public void run() {
+        // read & show broadcast massage
         while (true) {
             if (inputStream.hasNextLine())
                 System.out.println(inputStream.nextLine());

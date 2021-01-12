@@ -6,33 +6,32 @@ import java.util.*;
 
 public class Server {
     private ServerSocket serverSocket;
-    private final ArrayList<Socket> clientList;
+    private final Vector<Socket> clientList = new Vector<>();
 
     public Server() throws IOException {
-        // get port
+        // input port
         Scanner keyboard = new Scanner(System.in);
         System.out.print("Masukkan port : ");
         int port = keyboard.nextInt();
 
+        // start server
         try {
             serverSocket = new ServerSocket(port);
             serverSocket.setReuseAddress(true);
         } catch (IOException e) {
            e.getStackTrace();
         }
-
-        clientList = new ArrayList<Socket>();
-
-        startServer();
     }
 
-    public void startServer() throws IOException {
+    public void acceptClient() throws IOException {
         System.out.println("Menunggu Client...");
         while(true) {
+            // accept client
             Socket client = serverSocket.accept();
+            // add client socket to vector client list
             clientList.add(client);
-            System.out.println("Client baru telah bergabung");
             ClientHandler handler = new ClientHandler(client,this);
+            // start new thread client
             Thread t = new Thread(handler);
             t.start();
         }
@@ -50,6 +49,6 @@ public class Server {
     }
 
     public static void main(String[] args) throws IOException {
-        new Server();
+        new Server().acceptClient();
     }
 }
